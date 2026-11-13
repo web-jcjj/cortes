@@ -1,15 +1,42 @@
 # =====================================================
 # SISTEMA DE CORTES Y ANCHO DE BANDA - CENTRO
-# RouterOS 7 | Actualizado: 13/11/2026 11:41:36
+# RouterOS 7 | Actualizado: 13/11/2026 13:51:36
 # H=DOWNLOAD, I=UPLOAD | max-limit=UPLOAD/DOWNLOAD
 # Clientes por MAC se resuelven mediante DHCP del propio router.
 # =====================================================
 
-# --- ACTUALIZAR LISTA DE CLIENTES CORTADOS ---
-/ip firewall address-list remove [find list="CLIENTES_CORTADOS"];
-/ip firewall filter remove [find comment~"CORTE_MAC"];
+# --- ACTUALIZAR CLIENTES CORTADOS Y REGLAS DE AVISO ---
+/ip proxy set enabled=yes port=8080 cache-on-disk=no;
+/ip firewall address-list remove [find where list="CLIENTES_CORTADOS"];
+/ip proxy access remove [find where comment~"^CORTE_AVISO_"];
+/ip firewall filter remove [find where comment~"CORTE_MAC"];
+/ip firewall filter remove [find where comment="CORTE_IP_ORIGEN"];
+/ip firewall filter remove [find where comment="CORTE_IP_DESTINO"];
+:local natCorte [/ip firewall nat find where comment="CORTE_REDIRECCION_HTTP"];
+:if ([:len $natCorte] = 0) do={
+  /ip firewall nat add chain=dstnat src-address-list=CLIENTES_CORTADOS protocol=tcp dst-port=80 action=redirect to-ports=8080 comment="CORTE_REDIRECCION_HTTP";
+} else={ /ip firewall nat set $natCorte chain=dstnat src-address-list=CLIENTES_CORTADOS protocol=tcp dst-port=80 action=redirect to-ports=8080; }
+/ip firewall nat move [find where comment="CORTE_REDIRECCION_HTTP"] destination=0;
+/ip firewall filter remove [find where comment="CORTE_PROXY_INPUT"];
+/ip firewall filter add chain=input in-interface-list=LAN protocol=tcp dst-port=8080 action=accept comment="CORTE_PROXY_INPUT";
+/ip firewall filter move [find where comment="CORTE_PROXY_INPUT"] destination=0;
+:do { /ip firewall address-list add address=192.168.1.43 list="CLIENTES_CORTADOS" comment="CORTE_IP_1 Fila9 | corte 07/11/2026 08:00" } on-error={};
+:do { /ip proxy access add src-address=192.168.1.43 action=deny redirect-to="https://www.sistemhouse.com/p/cortes.html" comment="CORTE_AVISO_IP_1" } on-error={};
+:do { /ip firewall connection remove [find where src-address~"192.168.1.43"] } on-error={};
 
-:do { /ip firewall address-list add address=192.168.1.43 list="CLIENTES_CORTADOS" comment="Fila9 | corte 07/11/2026 08:00" } on-error={};
+# --- REGLAS DE FIREWALL PARA CLIENTES CORTADOS ---
+/ip firewall filter remove [find where comment~"^CORTE_PERMITIR_"];
+/ip firewall filter remove [find where comment="CORTE_BLOQUEO_GENERAL"];
+/ip firewall filter add chain=forward src-address-list=CLIENTES_CORTADOS protocol=udp dst-port=53 action=accept comment="CORTE_PERMITIR_DNS_UDP";
+/ip firewall filter add chain=forward src-address-list=CLIENTES_CORTADOS protocol=tcp dst-port=53 action=accept comment="CORTE_PERMITIR_DNS_TCP";
+/ip firewall filter add chain=forward src-address-list=CLIENTES_CORTADOS protocol=tcp dst-port=443 tls-host="www.sistemhouse.com" action=accept comment="CORTE_PERMITIR_AVISO_HTTPS";
+/ip firewall filter add chain=forward src-address-list=CLIENTES_CORTADOS action=drop comment="CORTE_BLOQUEO_GENERAL";
+/ip firewall filter move [find where comment="CORTE_BLOQUEO_GENERAL"] destination=0;
+/ip firewall filter move [find where comment="CORTE_PERMITIR_AVISO_HTTPS"] destination=0;
+/ip firewall filter move [find where comment="CORTE_PERMITIR_DNS_TCP"] destination=0;
+/ip firewall filter move [find where comment="CORTE_PERMITIR_DNS_UDP"] destination=0;
+/ip firewall filter move [find where comment~"^CORTE_MAC_SIN_DHCP"] destination=0;
+
 
 # --- ANCHO DE BANDA: LISTA AUXILIAR PARA EXCLUIR DE FASTTRACK ---
 /ip firewall address-list remove [find list="BW_CLIENTES" comment="BW_AUTO_centro"];
