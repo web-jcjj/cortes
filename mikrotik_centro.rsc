@@ -1,6 +1,6 @@
 # =====================================================
 # SISTEMA DE CORTES Y ANCHO DE BANDA - CENTRO
-# RouterOS 7 | Actualizado: 13/11/2026 22:49:09
+# RouterOS 7 | Actualizado: 13/11/2026 23:11:12
 # H=DOWNLOAD, I=UPLOAD | max-limit=UPLOAD/DOWNLOAD
 # Clientes por MAC se resuelven mediante DHCP del propio router.
 # =====================================================
@@ -21,7 +21,7 @@
 /ip firewall filter add chain=input in-interface-list=LAN protocol=tcp dst-port=8080 action=accept comment="CORTE_PROXY_INPUT";
 :do { /ip firewall filter move [find where comment="CORTE_PROXY_INPUT"] destination=0 } on-error={};
 :do { /ip firewall address-list add address=192.168.1.43 list="CLIENTES_CORTADOS" comment="CORTE_IP_1 Fila9 | corte 07/11/2026 08:00" } on-error={};
-:do { /ip proxy access add src-address=192.168.1.43 action=deny redirect-to="https://www.sistemhouse.com/p/cortes.html" comment="CORTE_AVISO_IP_1" } on-error={};
+:do { /ip proxy access add src-address=192.168.1.43 action=redirect action-data="https://www.sistemhouse.com/p/cortes.html" comment="CORTE_AVISO_IP_1" } on-error={};
 :do { /ip firewall connection remove [find where src-address~"192.168.1.43"] } on-error={};
 
 # --- REGLAS DE FIREWALL PARA CLIENTES CORTADOS ---
