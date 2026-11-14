@@ -1,6 +1,6 @@
 # =====================================================
 # SISTEMA DE CORTES Y ANCHO DE BANDA - RINCONADA
-# RouterOS 7 | Actualizado: 13/11/2026 20:40:26
+# RouterOS 7 | Actualizado: 13/11/2026 20:57:36
 # H=DOWNLOAD, I=UPLOAD | max-limit=UPLOAD/DOWNLOAD
 # Clientes por MAC se resuelven mediante DHCP del propio router.
 # =====================================================
@@ -23,6 +23,16 @@
 :do { /ip firewall address-list add address=192.168.100.64 list="CLIENTES_CORTADOS" comment="CORTE_IP_1 Fila27 | corte 28/10/2026 12:00" } on-error={};
 :do { /ip proxy access add src-address=192.168.100.64 action=deny redirect-to="https://www.sistemhouse.com/p/cortes.html" comment="CORTE_AVISO_IP_1" } on-error={};
 :do { /ip firewall connection remove [find where src-address~"192.168.100.64"] } on-error={};
+:local corteLease1 [/ip dhcp-server lease find where mac-address="B0:7B:25:4E:43:45" and status=bound];
+:if ([:len $corteLease1] > 0) do={
+  :local corteIp1 [/ip dhcp-server lease get ($corteLease1->0) address];
+  :local corteSrc1 ($corteIp1 . "/32");
+  :do { /ip firewall address-list add list="CLIENTES_CORTADOS" address=$corteSrc1 comment="CORTE_MAC_1 Fila14 | corte 01/11/2026 08:00" } on-error={};
+  :do { /ip proxy access add src-address=$corteSrc1 action=deny redirect-to="https://www.sistemhouse.com/p/cortes.html" comment="CORTE_AVISO_MAC_1" } on-error={};
+  :do { /ip firewall connection remove [find where src-address~$corteIp1] } on-error={};
+} else={
+  :do { /ip firewall filter add chain=forward src-mac-address=B0:7B:25:4E:43:45 action=drop comment="CORTE_MAC_SIN_DHCP_1" } on-error={};
+}
 
 # --- REGLAS DE FIREWALL PARA CLIENTES CORTADOS ---
 /ip firewall filter remove [find where comment~"^CORTE_PERMITIR_"];
