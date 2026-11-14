@@ -1,6 +1,6 @@
 # =====================================================
 # SISTEMA DE CORTES Y ANCHO DE BANDA - RINCONADA
-# RouterOS 7 | Actualizado: 14/11/2026 11:35:50
+# RouterOS 7 | Actualizado: 14/11/2026 11:44:29
 # H=DOWNLOAD, I=UPLOAD | max-limit=UPLOAD/DOWNLOAD
 # Clientes por MAC se resuelven mediante DHCP del propio router.
 # =====================================================
@@ -52,9 +52,9 @@
   :local bwTarget1 ($bwIp1 . "/32");
   :set bwQueue1 [/queue simple find where name="BW_rinconada_b07b254e4345"];
   :if ([:len $bwQueue1] = 0) do={
-    /queue simple add name="BW_rinconada_b07b254e4345" target=$bwTarget1 max-limit=10M/10M comment="BW_AUTO_rinconada";
+    /queue simple add name="BW_rinconada_b07b254e4345" target=$bwTarget1 max-limit=10M/15M comment="BW_AUTO_rinconada";
   } else={
-    /queue simple set $bwQueue1 target=$bwTarget1 max-limit=10M/10M comment="BW_AUTO_rinconada";
+    /queue simple set $bwQueue1 target=$bwTarget1 max-limit=10M/15M comment="BW_AUTO_rinconada";
   }
   :do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget1 comment="BW_AUTO_rinconada" } on-error={};
 } else={
