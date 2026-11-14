@@ -1,6 +1,6 @@
 # =====================================================
 # SISTEMA DE CORTES Y ANCHO DE BANDA - RINCONADA
-# RouterOS 7 | Actualizado: 13/11/2026 23:31:06
+# RouterOS 7 | Actualizado: 13/11/2026 23:53:03
 # H=DOWNLOAD, I=UPLOAD | max-limit=UPLOAD/DOWNLOAD
 # Clientes por MAC se resuelven mediante DHCP del propio router.
 # =====================================================
@@ -26,16 +26,6 @@
 :do { /ip firewall address-list add address=192.168.100.64 list="CLIENTES_CORTADOS" comment="CORTE_IP_2 Fila27 | corte 28/10/2026 12:00" } on-error={};
 :do { /ip proxy access add src-address=192.168.100.64 action=redirect action-data="https://www.sistemhouse.com/p/cortes.html" comment="CORTE_AVISO_IP_2" } on-error={};
 :do { /ip firewall connection remove [find where src-address~"192.168.100.64"] } on-error={};
-:local corteLease1 [/ip dhcp-server lease find where mac-address="B0:7B:25:4E:43:45" and status=bound];
-:if ([:len $corteLease1] > 0) do={
-  :local corteIp1 [/ip dhcp-server lease get ($corteLease1->0) address];
-  :local corteSrc1 ($corteIp1 . "/32");
-  :do { /ip firewall address-list add list="CLIENTES_CORTADOS" address=$corteSrc1 comment="CORTE_MAC_1 Fila14 | corte 01/11/2026 10:00" } on-error={};
-  :do { /ip proxy access add src-address=$corteSrc1 action=redirect action-data="https://www.sistemhouse.com/p/cortes.html" comment="CORTE_AVISO_MAC_1" } on-error={};
-  :do { /ip firewall connection remove [find where src-address~$corteIp1] } on-error={};
-} else={
-  :do { /ip firewall filter add chain=forward src-mac-address=B0:7B:25:4E:43:45 action=drop comment="CORTE_MAC_SIN_DHCP_1" } on-error={};
-}
 
 # --- REGLAS DE FIREWALL PARA CLIENTES CORTADOS ---
 /ip firewall filter remove [find where comment~"^CORTE_PERMITIR_"];
@@ -54,7 +44,31 @@
 # --- ANCHO DE BANDA: LISTA AUXILIAR PARA EXCLUIR DE FASTTRACK ---
 /ip firewall address-list remove [find list="BW_CLIENTES" comment="BW_AUTO_rinconada"];
 
+# Cliente: Fila14
+:local bwQueue1 [/queue simple find where name="BW_rinconada_b07b254e4345"];
+:local bwLease1 [/ip dhcp-server lease find where mac-address="B0:7B:25:4E:43:45" and status=bound];
+:if ([:len $bwLease1] > 0) do={
+  :local bwIp1 [/ip dhcp-server lease get ($bwLease1->0) address];
+  :local bwTarget1 ($bwIp1 . "/32");
+  :set bwQueue1 [/queue simple find where name="BW_rinconada_b07b254e4345"];
+  :if ([:len $bwQueue1] = 0) do={
+    /queue simple add name="BW_rinconada_b07b254e4345" target=$bwTarget1 max-limit=5M/10M comment="BW_AUTO_rinconada";
+  } else={
+    /queue simple set $bwQueue1 target=$bwTarget1 max-limit=5M/10M comment="BW_AUTO_rinconada";
+  }
+  :do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget1 comment="BW_AUTO_rinconada" } on-error={};
+} else={
+  :if ([:len $bwQueue1] > 0) do={ /queue simple remove $bwQueue1; }
+  :log warning "BW: sin concesion DHCP bound para MAC B0:7B:25:4E:43:45";
+}
+
 # --- LIMPIEZA DE COLAS OBSOLETAS DE ESTE ROUTER ---
-/queue simple remove [find where comment="BW_AUTO_rinconada"];
+:local bwKeepNames {"BW_rinconada_b07b254e4345"};
+:foreach bwQ in=[/queue simple find where comment="BW_AUTO_rinconada"] do={
+  :local bwName [/queue simple get $bwQ name];
+  :local bwKeep false;
+  :foreach bwWanted in=$bwKeepNames do={ :if ($bwName = $bwWanted) do={ :set bwKeep true; } }
+  :if (!$bwKeep) do={ /queue simple remove $bwQ; }
+}
 
 # --- FIN DE CONFIGURACION ---
