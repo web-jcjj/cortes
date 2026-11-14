@@ -1,6 +1,6 @@
 # =====================================================
 # SISTEMA DE CORTES Y ANCHO DE BANDA - RINCONADA
-# RouterOS 7 | Actualizado: 14/11/2026 00:04:16
+# RouterOS 7 | Actualizado: 14/11/2026 00:04:32
 # H=DOWNLOAD, I=UPLOAD | max-limit=UPLOAD/DOWNLOAD
 # Clientes por MAC se resuelven mediante DHCP del propio router.
 # =====================================================
@@ -62,8 +62,118 @@
   :log warning "BW: sin concesion DHCP bound para MAC B0:7B:25:4E:43:45";
 }
 
+# Cliente: Fila16
+:local bwQueue2 [/queue simple find where name="BW_rinconada_19216810042"];
+:local bwTarget2 "192.168.100.42/32";
+:if ([:len $bwQueue2] = 0) do={
+  /queue simple add name="BW_rinconada_19216810042" target=$bwTarget2 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue2 target=$bwTarget2 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget2 comment="BW_AUTO_rinconada" } on-error={};
+
+# Cliente: Fila17
+:local bwQueue3 [/queue simple find where name="BW_rinconada_19216810043"];
+:local bwTarget3 "192.168.100.43/32";
+:if ([:len $bwQueue3] = 0) do={
+  /queue simple add name="BW_rinconada_19216810043" target=$bwTarget3 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue3 target=$bwTarget3 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget3 comment="BW_AUTO_rinconada" } on-error={};
+
+# Cliente: Fila18
+:local bwQueue4 [/queue simple find where name="BW_rinconada_19216810045"];
+:local bwTarget4 "192.168.100.45/32";
+:if ([:len $bwQueue4] = 0) do={
+  /queue simple add name="BW_rinconada_19216810045" target=$bwTarget4 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue4 target=$bwTarget4 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget4 comment="BW_AUTO_rinconada" } on-error={};
+
+# Cliente: Fila20
+:local bwQueue5 [/queue simple find where name="BW_rinconada_19216810036"];
+:local bwTarget5 "192.168.100.36/32";
+:if ([:len $bwQueue5] = 0) do={
+  /queue simple add name="BW_rinconada_19216810036" target=$bwTarget5 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue5 target=$bwTarget5 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget5 comment="BW_AUTO_rinconada" } on-error={};
+
+# Cliente: Fila21
+:local bwQueue6 [/queue simple find where name="BW_rinconada_19216810059"];
+:local bwTarget6 "192.168.100.59/32";
+:if ([:len $bwQueue6] = 0) do={
+  /queue simple add name="BW_rinconada_19216810059" target=$bwTarget6 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue6 target=$bwTarget6 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget6 comment="BW_AUTO_rinconada" } on-error={};
+
+# Cliente: Fila22
+:local bwQueue7 [/queue simple find where name="BW_rinconada_19216810037"];
+:local bwTarget7 "192.168.100.37/32";
+:if ([:len $bwQueue7] = 0) do={
+  /queue simple add name="BW_rinconada_19216810037" target=$bwTarget7 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue7 target=$bwTarget7 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget7 comment="BW_AUTO_rinconada" } on-error={};
+
+# Cliente: Fila23
+:local bwQueue8 [/queue simple find where name="BW_rinconada_19216810038"];
+:local bwTarget8 "192.168.100.38/32";
+:if ([:len $bwQueue8] = 0) do={
+  /queue simple add name="BW_rinconada_19216810038" target=$bwTarget8 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue8 target=$bwTarget8 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget8 comment="BW_AUTO_rinconada" } on-error={};
+
+# Cliente: Fila24
+:local bwQueue9 [/queue simple find where name="BW_rinconada_19216810062"];
+:local bwTarget9 "192.168.100.62/32";
+:if ([:len $bwQueue9] = 0) do={
+  /queue simple add name="BW_rinconada_19216810062" target=$bwTarget9 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue9 target=$bwTarget9 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget9 comment="BW_AUTO_rinconada" } on-error={};
+
+# Cliente: Fila25
+:local bwQueue10 [/queue simple find where name="BW_rinconada_19216810056"];
+:local bwTarget10 "192.168.100.56/32";
+:if ([:len $bwQueue10] = 0) do={
+  /queue simple add name="BW_rinconada_19216810056" target=$bwTarget10 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue10 target=$bwTarget10 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget10 comment="BW_AUTO_rinconada" } on-error={};
+
+# Cliente: Fila26
+:local bwQueue11 [/queue simple find where name="BW_rinconada_19216810049"];
+:local bwTarget11 "192.168.100.49/32";
+:if ([:len $bwQueue11] = 0) do={
+  /queue simple add name="BW_rinconada_19216810049" target=$bwTarget11 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue11 target=$bwTarget11 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget11 comment="BW_AUTO_rinconada" } on-error={};
+
+# Cliente: Fila28
+:local bwQueue12 [/queue simple find where name="BW_rinconada_19216810098"];
+:local bwTarget12 "192.168.100.98/32";
+:if ([:len $bwQueue12] = 0) do={
+  /queue simple add name="BW_rinconada_19216810098" target=$bwTarget12 max-limit=10M/10M comment="BW_AUTO_rinconada";
+} else={
+  /queue simple set $bwQueue12 target=$bwTarget12 max-limit=10M/10M comment="BW_AUTO_rinconada";
+}
+:do { /ip firewall address-list add list="BW_CLIENTES" address=$bwTarget12 comment="BW_AUTO_rinconada" } on-error={};
+
 # --- LIMPIEZA DE COLAS OBSOLETAS DE ESTE ROUTER ---
-:local bwKeepNames {"BW_rinconada_b07b254e4345"};
+:local bwKeepNames {"BW_rinconada_b07b254e4345";"BW_rinconada_19216810042";"BW_rinconada_19216810043";"BW_rinconada_19216810045";"BW_rinconada_19216810036";"BW_rinconada_19216810059";"BW_rinconada_19216810037";"BW_rinconada_19216810038";"BW_rinconada_19216810062";"BW_rinconada_19216810056";"BW_rinconada_19216810049";"BW_rinconada_19216810098"};
 :foreach bwQ in=[/queue simple find where comment="BW_AUTO_rinconada"] do={
   :local bwName [/queue simple get $bwQ name];
   :local bwKeep false;
